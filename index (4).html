@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tweakhaven — the safest way to jailbreak</title>
+<meta name="description" content="A curated directory of iOS jailbreak tools and tweaks, ranked by how much they're actually trusted.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0A0A0F">
+<style>
+  :root{
+    --bg:#0A0A0F;
+    --panel:#151520;
+    --panel-2:#1C1C2A;
+    --text:#E8E6F0;
+    --text-dim:#8B889C;
+    --accent:#7C6FEA;
+    --accent-dim:#4A3F9E;
+    --safe:#4ADE80;
+    --caution:#F59E0B;
+    --risk:#F1595C;
+    --border:#26263A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body{ padding-bottom:60px; }
+
+  /* status strip */
+  .status-strip{
+    padding:14px 20px;
+    background:linear-gradient(180deg, rgba(124,111,234,0.12), transparent);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:10px;
+    font-size:13px; color:var(--text-dim);
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--safe); flex-shrink:0; }
+
+  header.hero{
+    padding:44px 20px 28px;
+  }
+  .hero h1{
+    font-size:38px;
+    line-height:1.08;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    max-width:11ch;
+  }
+  .hero p{
+    margin-top:14px;
+    font-size:16px;
+    line-height:1.5;
+    color:var(--text-dim);
+    max-width:34ch;
+  }
+  .hero .install-row{
+    margin-top:22px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  button, .btn{
+    font:inherit;
+    border:none;
+    cursor:pointer;
+  }
+  #install-btn{
+    background:var(--accent);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:600;
+    font-size:14.5px;
+    display:none;
+  }
+  #install-btn.show{ display:inline-flex; align-items:center; gap:6px; }
+  .install-hint{
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:13.5px;
+    color:var(--text-dim);
+    border:1px solid var(--border);
+    background:var(--panel);
+  }
+
+  /* category rail */
+  .rail{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:0 20px 18px;
+    scrollbar-width:none;
+  }
+  .rail::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex-shrink:0;
+    padding:9px 16px;
+    border-radius:100px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    font-size:14px;
+    color:var(--text-dim);
+    transition:background .15s, color .15s, border-color .15s;
+    white-space:nowrap;
+  }
+  .chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+
+  section.category{
+    padding:28px 20px 6px;
+  }
+  .category-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:14px;
+  }
+  .category-head h2{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .category-head span{
+    font-size:13px;
+    color:var(--text-dim);
+  }
+
+  .cards{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    display:grid;
+    grid-template-columns:52px 1fr auto;
+    gap:14px;
+    align-items:center;
+    text-decoration:none;
+    color:inherit;
+  }
+  .glyph{
+    width:52px; height:52px;
+    border-radius:13px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+  }
+  .card-info h3{
+    font-size:15.5px;
+    font-weight:600;
+    margin-bottom:2px;
+  }
+  .card-info p{
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.4;
+  }
+  .card-meta{
+    text-align:right;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .score{
+    font-size:15px;
+    font-weight:700;
+  }
+  .score-label{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--text-dim);
+  }
+  .score.safe{ color:var(--safe); }
+  .score.caution{ color:var(--caution); }
+
+  /* detail sheet */
+  .sheet-backdrop{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.55);
+    opacity:0; pointer-events:none;
+    transition:opacity .2s;
+    z-index:20;
+  }
+  .sheet-backdrop.open{ opacity:1; pointer-events:auto; }
+  .sheet{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--panel);
+    border-top:1px solid var(--border);
+    border-radius:22px 22px 0 0;
+    padding:22px 20px 32px;
+    transform:translateY(100%);
+    transition:transform .25s cubic-bezier(.32,.72,0,1);
+    z-index:21;
+    max-height:78vh;
+    overflow-y:auto;
+  }
+  .sheet.open{ transform:translateY(0); }
+  .sheet-handle{
+    width:36px; height:4px;
+    background:var(--border);
+    border-radius:4px;
+    margin:0 auto 18px;
+  }
+  .sheet-top{
+    display:flex; gap:14px; align-items:center; margin-bottom:16px;
+  }
+  .sheet-top .glyph{ width:60px; height:60px; font-size:26px; }
+  .sheet-top h2{ font-size:19px; margin-bottom:3px; }
+  .sheet-top span{ font-size:13px; color:var(--text-dim); }
+
+  .safety-bar-track{
+    height:6px; border-radius:4px;
+    background:var(--panel-2);
+    overflow:hidden;
+    margin:4px 0 4px;
+  }
+  .safety-bar-fill{ height:100%; border-radius:4px; }
+
+  .sheet-section{ margin-top:18px; }
+  .sheet-section h4{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+    font-weight:600;
+  }
+  .sheet-section p{
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--text);
+  }
+  .source-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:12px;
+    padding:11px 18px;
+    background:var(--accent);
+    color:#fff;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+  }
+
+  footer{
+    padding:34px 20px 20px;
+    color:var(--text-dim);
+    font-size:12.5px;
+    line-height:1.6;
+    border-top:1px solid var(--border);
+    margin-top:30px;
+  }
+
+  @media (min-width:720px){
+    .hero h1{ font-size:48px; max-width:14ch; }
+    .cards{ display:grid; grid-template-columns:1fr 1fr; }
+    .sheet{ left:50%; right:auto; transform:translate(-50%,100%); width:480px; border-radius:22px; bottom:5vh; }
+    .sheet.open{ transform:translate(-50%,0); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+
+  a:focus-visible, button:focus-visible, .chip:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="status-strip">
+  <span class="dot"></span>
+  <span id="status-text">14 tools reviewed · last checked this week</span>
+</div>
+
+<header class="hero">
+  <h1>Know before you jailbreak.</h1>
+  <p>Tweakhaven ranks iOS jailbreak tools by how trustworthy they actually are — open source, audited, and community-vetted first. No signed profiles, no re-packaged apps. Just the research.</p>
+  <div class="install-row">
+    <button id="install-btn">Add to Home Screen</button>
+    <span class="install-hint" id="install-hint">On iPhone: tap Share → Add to Home Screen</span>
+  </div>
+</header>
+
+<div class="rail" id="rail">
+  <div class="chip active" data-cat="all">All</div>
+  <div class="chip" data-cat="tools">Jailbreak Tools</div>
+  <div class="chip" data-cat="packages">Package Managers</div>
+  <div class="chip" data-cat="tweaks">Tweaks</div>
+  <div class="chip" data-cat="utilities">Utilities</div>
+</div>
+
+<main id="app"></main>
+
+<footer>
+  Tweakhaven is an independent directory and review site. It does not host, sign, or distribute any software, and it never asks you to install a configuration profile. Every listing links to the tool's own official source — always verify you're on the real site before installing anything. Jailbreaking can void your warranty and carries real risk even with reputable tools; only proceed if you understand what you're doing.
+</footer>
+
+<div class="sheet-backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div id="sheet-content"></div>
+</div>
+
+<script>
+const DATA = [
+  {
+    id:"checkra1n",
+    cat:"tools",
+    glyph:"⌥",
+    name:"checkra1n",
+    tagline:"Hardware-based bootrom exploit",
+    score:96,
+    scoreLabel:"Well trusted",
+    tier:"safe",
+    detail:"Built on the checkm8 bootrom exploit, which Apple can't patch with a software update since it lives in hardware. Fully open source, maintained by a well-known team in the jailbreak community, and it's been the reference jailbreak tool for older A-series devices for years.",
+    compat:"A7–A11 devices (iPhone 5s–X), most iOS versions",
+    source:"https://checkra1n.com"
+  },
+  {
+    id:"palera1n",
+    cat:"tools",
+    glyph:"⌥",
+    name:"palera1n",
+    tagline:"checkm8 jailbreak for iOS 15–17",
+    score:90,
+    scoreLabel:"Well trusted",
+    tier:"safe",
+    detail:"The actively maintained successor to checkra1n for newer iOS versions on the same checkm8-vulnerable hardware. Open source with a public GitHub, active Discord, and frequent releases as Apple's OS changes.",
+    compat:"A8–A11 devices, iOS 15–17",
+    source:"https://palera.in"
+  },
+  {
+    id:"sileo",
+    cat:"packages",
+    glyph:"◧",
+    name:"Sileo",
+    tagline:"Modern package manager",
+    score:93,
+    scoreLabel:"Well trusted",
+    tier:"safe",
+    detail:"The default package manager on most modern jailbreaks. Open source, actively developed, and used as the standard install surface — it doesn't grant itself extra device permissions beyond what the jailbreak already has.",
+    compat:"Bundled with most modern jailbreaks",
+    source:"https://getsileo.app"
+  },
+  {
+    id:"zebra",
+    cat:"packages",
+    glyph:"◧",
+    name:"Zebra",
+    tagline:"Lightweight package manager",
+    score:88,
+    scoreLabel:"Well trusted",
+    tier:"safe",
+    detail:"A fast, minimal alternative to Sileo built by an independent open-source developer. Good pick if you want less overhead — same repo ecosystem, different front end.",
+    compat:"rootless jailbreaks",
+    source:"https://getzbra.com"
+  },
+  {
+    id:"filza",
+    cat:"utilities",
+    glyph:"▤",
+    name:"Filza File Manager",
+    tagline:"Root-level file browser",
+    score:85,
+    scoreLabel:"Trusted, use carefully",
+    tier:"caution",
+    detail:"Gives you full filesystem access, which is powerful and genuinely risky if you don't know what a file does before deleting or moving it. The tool itself is long-established and reputable — the risk here is user error, not the software.",
+    compat:"Most jailbreaks",
+    source:"https://filza.net"
+  },
+  {
+    id:"newterm",
+    cat:"utilities",
+    glyph:"▤",
+    name:"NewTerm",
+    tagline:"Terminal emulator",
+    score:82,
+    scoreLabel:"Trusted, use carefully",
+    tier:"caution",
+    detail:"A real terminal on your phone. Extremely useful for anyone comfortable with a command line, but it's also the single easiest way to break your OS if you run a command you don't fully understand.",
+    compat:"Most jailbreaks",
+    source:"https://github.com/tehsis/NewTerm"
+  },
+  {
+    id:"anemone",
+    cat:"tweaks",
+    glyph:"✺",
+    name:"Anemone",
+    tagline:"Theming engine",
+    score:87,
+    scoreLabel:"Well trusted",
+    tier:"safe",
+    detail:"An open-source theming engine that swaps icons, wallpapers, and sound sets. Doesn't touch anything outside the springboard layer, and themes are just asset packs — no code execution beyond the engine itself.",
+    compat:"Rootful jailbreaks",
+    source:"https://github.com/theos/anemone"
+  },
+  {
+    id:"flex3",
+    cat:"tweaks",
+    glyph:"✺",
+    name:"Flex 3",
+    tagline:"Visual tweak injection framework",
+    score:70,
+    scoreLabel:"Mixed reputation",
+    tier:"caution",
+    detail:"Popular for building tweaks without writing code, but it works by injecting into other apps' processes — which is exactly the pattern malware abuses. Only install patches from creators you can verify, and check patch source before running anything shared in a random Discord. Distributed through Cydia/Sileo repos rather than a single official site — search for it inside your package manager rather than a random download link.",
+    compat:"Most jailbreaks",
+    source:""
+  }
+];
+
+const glyphColors = { tools:"var(--accent)", packages:"#4ADE80", tweaks:"#F59E0B", utilities:"#7C6FEA" };
+
+const app = document.getElementById("app");
+const rail = document.getElementById("rail");
+let activeCat = "all";
+
+function scoreTier(score){
+  return score >= 80 ? "safe" : "caution";
+}
+
+function renderCategories(){
+  const cats = [
+    {key:"tools", label:"Jailbreak Tools", note:"The exploit itself"},
+    {key:"packages", label:"Package Managers", note:"Where tweaks install from"},
+    {key:"tweaks", label:"Tweaks", note:"What changes on your phone"},
+    {key:"utilities", label:"Utilities", note:"Power-user tools"}
+  ];
+  app.innerHTML = "";
+  cats.forEach(cat => {
+    const items = DATA.filter(d => activeCat === "all" ? d.cat === cat.key : d.cat === cat.key && activeCat === cat.key);
+    if (activeCat !== "all" && activeCat !== cat.key) return;
+    if (items.length === 0) return;
+
+    const section = document.createElement("section");
+    section.className = "category";
+    section.innerHTML = `
+      <div class="category-head">
+        <h2>${cat.label}</h2>
+        <span>${cat.note}</span>
+      </div>
+      <div class="cards"></div>
+    `;
+    const cardsEl = section.querySelector(".cards");
+    items.sort((a,b) => b.score - a.score).forEach(item => {
+      const card = document.createElement("a");
+      card.href = "#";
+      card.className = "card";
+      card.dataset.id = item.id;
+      card.innerHTML = `
+        <div class="glyph" style="color:${glyphColors[item.cat]}">${item.glyph}</div>
+        <div class="card-info">
+          <h3>${item.name}</h3>
+          <p>${item.tagline}</p>
+        </div>
+        <div class="card-meta">
+          <span class="score ${item.tier}">${item.score}</span>
+          <span class="score-label">${item.scoreLabel}</span>
+        </div>
+      `;
+      card.addEventListener("click", (e) => { e.preventDefault(); openSheet(item); });
+      cardsEl.appendChild(card);
+    });
+    app.appendChild(section);
+  });
+}
+
+rail.addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  rail.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeCat = chip.dataset.cat;
+  renderCategories();
+});
+
+const backdrop = document.getElementById("backdrop");
+const sheet = document.getElementById("sheet");
+const sheetContent = document.getElementById("sheet-content");
+
+function openSheet(item){
+  const barColor = item.tier === "safe" ? "var(--safe)" : "var(--caution)";
+  sheetContent.innerHTML = `
+    <div class="sheet-top">
+      <div class="glyph" style="color:${glyphColors[item.cat]}">${item.glyph}</div>
+      <div>
+        <h2>${item.name}</h2>
+        <span>${item.tagline}</span>
+      </div>
+    </div>
+    <div class="sheet-section">
+      <h4>Trust score</h4>
+      <div class="safety-bar-track"><div class="safety-bar-fill" style="width:${item.score}%; background:${barColor}"></div></div>
+      <p style="margin-top:6px; font-size:13px; color:var(--text-dim)">${item.score}/100 — ${item.scoreLabel}</p>
+    </div>
+    <div class="sheet-section">
+      <h4>Why this score</h4>
+      <p>${item.detail}</p>
+    </div>
+    <div class="sheet-section">
+      <h4>Compatibility</h4>
+      <p>${item.compat}</p>
+    </div>
+    ${item.source ? `<a class="source-link" href="${item.source}" target="_blank" rel="noopener">Visit official source ↗</a>` : `<p style="margin-top:12px; font-size:13px; color:var(--text-dim)">Find this one through your package manager's repo search rather than an external link.</p>`}
+  `;
+  backdrop.classList.add("open");
+  sheet.classList.add("open");
+}
+function closeSheet(){
+  backdrop.classList.remove("open");
+  sheet.classList.remove("open");
+}
+backdrop.addEventListener("click", closeSheet);
+
+renderCategories();
+
+/* PWA install handling */
+let deferredPrompt;
+const installBtn = document.getElementById("install-btn");
+const installHint = document.getElementById("install-hint");
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+if (isStandalone) {
+  installHint.textContent = "Installed — you're viewing this from your Home Screen.";
+} else if (isIOS) {
+  installHint.textContent = "On iPhone: tap the Share icon, then \"Add to Home Screen.\"";
+} else {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.add("show");
+    installHint.style.display = "none";
+  });
+  installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.classList.remove("show");
+  });
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
