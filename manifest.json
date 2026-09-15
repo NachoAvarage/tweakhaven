@@ -1,0 +1,19 @@
+{
+    "name": "CoolKidz",
+    "short_name": "CoolKidz",
+    "description": "CoolKidz utilities and app information.",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#595959",
+    "theme_color": "#595959",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
